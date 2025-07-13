@@ -4,7 +4,7 @@ import { FaStar } from 'react-icons/fa';
 import { CameraIcon } from '@heroicons/react/24/outline';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import ProductGrid from './productGrid';
+import ProductGrid from './ProductGrid';
 import { fetchProductDetails, fetchSimilarProducts } from '../../redux/slices/productsSlice';
 import { addToCart } from '../../redux/slices/cartSlice';
 import axios from 'axios';

@@ -9,7 +9,7 @@ import FeaturesSection from "../components/products/FeaturesSection";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductsByFilters } from "../redux/slices/productsSlice";
 import axios from "axios";
-import ProductGrid from "../components/products/productGrid";
+import ProductGrid from "../components/products/ProductGrid";
 
 const Home = () => {
   const dispatch = useDispatch();

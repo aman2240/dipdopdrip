@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaFilter } from "react-icons/fa";
 import FilterSidebar from "../components/products/FilterSidebar";
 import SortOptions from "../components/products/SortOptions";
-import ProductGrid from "../components/products/productGrid";
+import ProductGrid from "../components/products/ProductGrid";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductsByFilters } from "../redux/slices/productsSlice";

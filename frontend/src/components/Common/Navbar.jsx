@@ -66,24 +66,48 @@ const Navbar = () => {
     </Link> */}
   </div>
       {/* right - icons */}
-      <div className="flex items-center space-x-4 relative right-2">
-        {user && user.role === "admin" && (
-        <Link to="/admin" className="block bg-black px-2 rounded text-sm text-white">Admin</Link>)}
-        <Link to="/profile" className="hover:text-black">
-          <HiOutlineUser className="h-6 w-6 text-gray-700" />
-        </Link>
-        <button onClick={toggleCartDrawer} className="relative hover:text-black">
-          <HiOutlineShoppingBag className="h-6 w-6 text-gray-700 curpo cursor-pointer " />
-          {cartItemCount > 0 && (<span className="absolute -top-1 bg-[#ea2e0e] text-white text-xs rounded-full px-2 py-0.5">
-            {cartItemCount}
-          </span>)}
-          
-        </button >
-        <SearchBar />
+      {/* Right icons - Mobile version */}
+<div className="flex items-center space-x-2 relative left-4 min-w-0 flex-shrink-0 sm:hidden">
+  {user && user.role === "admin" && (
+    <Link to="/admin" className="bg-black px-1.5 py-0.5 rounded text-xs text-white">Admin</Link>
+  )}
+  <Link to="/profile" className="hover:text-black">
+    <HiOutlineUser className="h-5 w-5 text-gray-700" />
+  </Link>
+  <button onClick={toggleCartDrawer} className="relative hover:text-black">
+    <HiOutlineShoppingBag className="h-5 w-5 text-gray-700 cursor-pointer" />
+    {cartItemCount > 0 && (
+      <span className="absolute -top-1 -right-1 bg-[#ea2e0e] text-white text-[10px] rounded-full px-1.5 py-0.5">
+        {cartItemCount}
+      </span>
+    )}
+  </button>
+
+  <div className="w-[120px] min-w-0 flex-shrink">
+    <SearchBar />
+  </div>
+</div>
+
+{/* Right icons - Desktop version */}
+<div className="hidden sm:flex items-center space-x-4 relative right-2">
+  {user && user.role === "admin" && (
+    <Link to="/admin" className="block bg-black px-2 rounded text-sm text-white">Admin</Link>
+  )}
+  <Link to="/profile" className="hover:text-black">
+    <HiOutlineUser className="h-6 w-6 text-gray-700" />
+  </Link>
+  <button onClick={toggleCartDrawer} className="relative hover:text-black">
+    <HiOutlineShoppingBag className="h-6 w-6 text-gray-700 cursor-pointer" />
+    {cartItemCount > 0 && (
+      <span className="absolute -top-1 bg-[#ea2e0e] text-white text-xs rounded-full px-2 py-0.5">
+        {cartItemCount}
+      </span>
+    )}
+  </button>
+  <SearchBar />
+</div>
 
 
-        
-      </div>
     </nav>
     <CartDrawer drawerOpen={drawerOpen} toggleCartDrawer={toggleCartDrawer}/>
 

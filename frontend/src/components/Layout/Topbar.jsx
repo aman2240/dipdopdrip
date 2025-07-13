@@ -5,11 +5,11 @@ import { TbBrandMeta } from 'react-icons/tb';
 
 const Topbar = () => {
   return (
-    <div className="bg-[#ea2e0e] text-white text-xs sm:text-sm font-medium">
-      <div className="container mx-auto px-4 py-2 flex flex-col items-center justify-center sm:flex-row sm:justify-between gap-1 sm:gap-0">
+    <div className="bg-[#ea2e0e] text-white text-xs sm:text-sm font-medium relative">
+      <div className="container mx-auto px-4 py-2 flex flex-col sm:flex-row items-center sm:justify-start relative gap-1 sm:gap-0">
         
-        {/* Social Icons - Centered */}
-        <div className="flex items-center justify-center space-x-2 sm:space-x-3">
+        {/* Social Icons */}
+        <div className="flex items-center justify-center sm:justify-start space-x-2 sm:space-x-3 w-full sm:w-auto">
           <a href="#" className="hover:text-gray-300" aria-label="Meta">
             <TbBrandMeta className="h-4 w-4" />
           </a>
@@ -21,8 +21,8 @@ const Topbar = () => {
           </a>
         </div>
 
-        {/* COD Warning - Below on mobile, right side on larger screens */}
-        <div className="text-center px-2">
+        {/* COD Warning */}
+        <div className="text-center px-2 sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 w-full sm:w-auto">
           COD orders will incur an additional ₹50 handling fee!
         </div>
       </div>

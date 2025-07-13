@@ -67,7 +67,7 @@ const Navbar = () => {
   </div>
       {/* right - icons */}
       {/* Right icons - Mobile version */}
-<div className="flex items-center space-x-2 relative left-4 min-w-0 flex-shrink-0 sm:hidden">
+<div className="flex items-center space-x-2 relative -right-8 min-w-0 flex-shrink-0 sm:hidden">
   {user && user.role === "admin" && (
     <Link to="/admin" className="bg-black px-1.5 py-0.5 rounded text-xs text-white">Admin</Link>
   )}

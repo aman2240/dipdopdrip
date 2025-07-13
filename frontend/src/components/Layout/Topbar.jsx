@@ -5,30 +5,26 @@ import { TbBrandMeta } from 'react-icons/tb';
 
 const Topbar = () => {
   return (
-    <div className="bg-[#ea2e0e] text-white relative">
-      <div className="container mx-auto py-3 px-4 flex items-center justify-between relative">
-        {/* Social Icons */}
-        <div className="hidden md:flex items-center space-x-4">
-          <a href="#" className="hover:text-gray-300">
-            <TbBrandMeta className="h-5 w-5" />
+    <div className="bg-[#ea2e0e] text-white text-xs sm:text-sm font-medium">
+      <div className="container mx-auto px-4 py-2 flex flex-col items-center justify-center sm:flex-row sm:justify-between gap-1 sm:gap-0">
+        
+        {/* Social Icons - Centered */}
+        <div className="flex items-center justify-center space-x-2 sm:space-x-3">
+          <a href="#" className="hover:text-gray-300" aria-label="Meta">
+            <TbBrandMeta className="h-4 w-4" />
           </a>
-          <a href="https://www.instagram.com/dipdopdrip" className="hover:text-gray-300">
-            <IoLogoInstagram className="h-5 w-5" />
+          <a href="https://www.instagram.com/dipdopdrip" className="hover:text-gray-300" aria-label="Instagram">
+            <IoLogoInstagram className="h-4 w-4" />
           </a>
-          <a href="#" className="hover:text-gray-300">
+          <a href="#" className="hover:text-gray-300" aria-label="Twitter">
             <RiTwitterXLine className="h-4 w-4" />
           </a>
         </div>
 
-        {/* COD Warning - Centered Absolutely */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 text-sm font-medium">
+        {/* COD Warning - Below on mobile, right side on larger screens */}
+        <div className="text-center px-2">
           COD orders will incur an additional ₹50 handling fee!
         </div>
-        {/* <div className="text-sm hidden md:block">
-          <a href="tel:+1234567890" className="hover:text-gray-300">
-            +1 (234) 567-890
-          </a>
-        </div> */}
       </div>
     </div>
   );

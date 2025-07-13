@@ -1,0 +1,30 @@
+# Logs
+logs/
+*.log
+
+# Node modules
+frontend/node_modules/
+backend/node_modules/
+node_modules/
+
+# Environment variables
+frontend/.env
+backend/.env
+.env
+
+# Build output
+frontend/build/
+dist/
+
+# OS and system files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE settings
+.vscode/
+.idea/
+
+# Optional: Lock files (if you're using Yarn or pnpm instead of npm)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

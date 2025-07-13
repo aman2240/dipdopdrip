@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+
+#root{
+  font-family: "Inter",sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+/* src/index.css */
+.poppins-font {
+  font-family: 'Poppins', sans-serif;
+}
+:root {
+  --dip-red: #ea2e0e; 
+}
+
+.dip-red{
+  color: var(--dip-red);
+}
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+}
+/* In your global CSS file or Tailwind's base layer */
+html, body {
+  overflow-x: hidden;
+}

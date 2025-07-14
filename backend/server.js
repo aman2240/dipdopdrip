@@ -24,7 +24,7 @@ const razorpayRoutes = require("./routes/razorpayRoutes");
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: "https://dipdopdrip-wor8.vercel.app" ,
+  origin: "https://www.dipdopdrip.in" ,
   credentials: true
 }));
 dotenv.config();

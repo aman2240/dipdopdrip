@@ -38,7 +38,7 @@ const ProductDetails = ({ productId }) => {
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const res = await axios.get(`/api/products/${productFetchId}`);
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products/${productFetchId}`);
       setProduct(res.data);
       setReviews(res.data.reviews || []);
     };
@@ -154,7 +154,7 @@ const ProductDetails = ({ productId }) => {
     setReviewText("");
     setReviewImage(null);
 
-    const res = await axios.get(`/api/products/${productFetchId}`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products/${productFetchId}`);
     setProduct(res.data);
     setReviews(res.data.reviews || []);
   } catch (error) {

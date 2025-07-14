@@ -8,8 +8,8 @@ const Topbar = () => {
     <div className="bg-[#ea2e0e] text-white text-xs sm:text-sm font-medium relative">
       <div className="container mx-auto px-4 py-2 flex flex-col sm:flex-row items-center sm:justify-start relative gap-1 sm:gap-0">
         
-        {/* Social Icons */}
-        <div className="flex items-center justify-center sm:justify-start space-x-2 sm:space-x-3 w-full sm:w-auto">
+        {/* Social Icons - hidden on small screens */}
+        <div className="hidden sm:flex items-center justify-center sm:justify-start space-x-2 sm:space-x-3 w-full sm:w-auto">
           <a href="#" className="hover:text-gray-300" aria-label="Meta">
             <TbBrandMeta className="h-4 w-4" />
           </a>

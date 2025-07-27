@@ -261,7 +261,7 @@ const adminHtml = `
   <div style="font-family: Arial, sans-serif; padding: 20px;">
     <h2 style="color: #333;">New Order Received - <strong>#${finalOrder._id}</strong></h2>
     <p><strong>User:</strong> ${checkout.user.name || "Unknown"} (${checkout.user.email || "No email"})</p>
-    <p><strong>Paid At:</strong> ${new Date(finalOrder.paidAt).toLocaleString()}</p>
+    <p><strong>Paid At:</strong> ${new Date(finalOrder.paidAt).toLocaleString("en-GB")}</p>
     <p><strong>Payment Method:</strong> ${finalOrder.paymentMethod}</p>
     <p><strong>Total Price:</strong> ₹${finalOrder.totalPrice}</p>
 

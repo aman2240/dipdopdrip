@@ -13,6 +13,10 @@ import colorMap from '../../utils/colorMap';
 const ProductDetails = ({ productId }) => {
   const { id } = useParams();
   const dispatch = useDispatch();
+  useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
+
   const { selectedProduct, loading, error, similarProducts } = useSelector((state) => state.products);
   const { user, guestId } = useSelector((state) => state.auth);
 

@@ -23,6 +23,11 @@ import AddProductPage from "./components/Admin/AddProductPage";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import ProtectedRoute from "./components/Common/ProtectedRoute";
+import ContactUs from "./pages/ContactUs";
+import ShippingPolicy from "./pages/ShippingPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import CancellationAndRefundPolicy from "./pages/CancellationAndRefundPolicy";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const App = () => {
   return (
@@ -42,6 +47,12 @@ const App = () => {
           <Route path="order-confirmation" element={<OrderConfirmationPage/>} />
           <Route path="order/:id" element={<OrderDetailsPage />} />
           <Route path="/my-orders" element={<MyOrdersPage />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/shipping-policy" element={<ShippingPolicy />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/cancellation-policy" element={<CancellationAndRefundPolicy />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
       </Route>
       <Route path="/admin" element={<ProtectedRoute role="admin"><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminHomePage />} />

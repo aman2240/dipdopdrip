@@ -26,10 +26,10 @@ const FeaturesSection = () => {
               <HiArrowPathRoundedSquare className="text-2xl text-gray-700" />
             </div>
             <h4 className="text-sm font-semibold tracking-tighter mb-1 uppercase">
-              3 Days Order Return Policy
+              Order Return Policy
             </h4>
             <p className="text-gray-600 text-sm tracking-tight">
-              Money back guarantee
+              Return only if wrong or defective item received
             </p>
           </div>
 

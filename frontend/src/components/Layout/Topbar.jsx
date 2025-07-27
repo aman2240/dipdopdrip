@@ -23,7 +23,7 @@ const Topbar = () => {
 
         {/* COD Warning */}
         <div className="text-center px-2 sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 w-full sm:w-auto">
-          COD orders will incur an additional ₹50 handling fee!
+          Drip meets comfort in our oversized tees with anime and casual designs.
         </div>
       </div>
     </div>

@@ -34,7 +34,7 @@ const Checkout = () => {
     }
   }, [cart, navigate]);
 
-  const totalAmount = selectedPaymentMethod === "cod" ? cart.totalPrice + 50 : cart.totalPrice;
+  const totalAmount = cart.totalPrice;
 
   const handleCreateCheckout = async (e) => {
     e.preventDefault();
@@ -352,6 +352,11 @@ const Checkout = () => {
                     onSuccess={handlePaymentSuccess}
                     onError={() => alert("Payment failed. Try again")}
                     checkoutId={checkoutId}
+                    userInfo={{
+                    name: `${shippingAddress.firstName} ${shippingAddress.lastname}`,
+                    email: user?.email || "",
+                    contact: shippingAddress.phone,
+                  }}
                   />
                 )}
                 {selectedPaymentMethod === "cod" && (
@@ -431,12 +436,12 @@ const Checkout = () => {
     <p>Shipping</p>
     <p>Free</p>
   </div>
-  {selectedPaymentMethod === "cod" && (
+  {/* {selectedPaymentMethod === "cod" && (
     <div className="flex justify-between text-lg mb-2">
       <p>COD Fee</p>
       <p>₹50</p>
     </div>
-  )}
+  )} */}
   <div className="flex justify-between text-lg mt-4 border-t pt-4 font-semibold">
     <p>Total</p>
     <p>₹{totalAmount.toLocaleString()}</p>

@@ -1,6 +1,6 @@
 import React from "react";
 
-const RazorpayButton = ({ amount, onSuccess, onError, checkoutId }) => {
+const RazorpayButton = ({ amount, onSuccess, onError, checkoutId, userInfo }) => {
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
       if (window.Razorpay) return resolve(true);
@@ -26,7 +26,7 @@ const RazorpayButton = ({ amount, onSuccess, onError, checkoutId }) => {
         throw new Error("Invalid amount specified for payment");
       }
 
-      const res = await fetch("http://localhost:9000/api/razorpay/create-order", {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/razorpay/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,17 +45,19 @@ const RazorpayButton = ({ amount, onSuccess, onError, checkoutId }) => {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID || "YOUR_PUBLIC_KEY",
         amount: data.amount,
         currency: "INR",
-        name: "My Store",
-        description: "Test Transaction",
+        name: "dipdopdrip",
+        description: "Order Payment",
         order_id: data.id,
         handler: function (response) {
           onSuccess?.(response);
         },
         prefill: {
-          name: "Test User",
-          email: "test@example.com",
-          contact: "9999999999",
-        },
+  name: userInfo?.name || "Guest",
+  email: userInfo?.email || "test@example.com",
+  contact: userInfo?.contact || "9999999999",
+},
+
+
         theme: {
           color: "#000000",
         },

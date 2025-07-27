@@ -52,10 +52,10 @@ const ProductGrid = ({ products = [], loading, error }) => {
                 {product.name}
               </h3>
 
-              {/* Price + Colors */}
+              {/* Price + Color Swatches */}
               <div className="mt-1">
-                <div className="flex justify-between items-start gap-2">
-                  {/* Price and discount */}
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
+                  {/* Price & Discount */}
                   <div className="flex flex-col gap-1">
                     {hasDiscount ? (
                       <>
@@ -85,7 +85,7 @@ const ProductGrid = ({ products = [], loading, error }) => {
 
                   {/* Color Swatches */}
                   {uniqueColors.length > 0 && (
-                    <div className="flex gap-1 flex-wrap mt-1">
+                    <div className="flex gap-1 flex-wrap mt-1 md:mt-0">
                       {uniqueColors.slice(0, 5).map((color, idx) => (
                         <div
                           key={idx}

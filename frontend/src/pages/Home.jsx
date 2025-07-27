@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProductsByFilters } from "../redux/slices/productsSlice";
 import axios from "axios";
 import ProductGrid from "../components/products/ProductGrid";
+import PromoBanner from "../components/products/PromoBanner";
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -41,6 +42,7 @@ const Home = () => {
       <Hero />
       <GenderCollection />
       <NewArrivals />
+      <PromoBanner />
 
       {/* Best Seller Section */}
       <div className="container mx-auto my-10">

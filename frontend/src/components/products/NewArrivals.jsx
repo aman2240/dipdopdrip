@@ -123,15 +123,19 @@ const updateScrollButtons = () => {
             <Link to={`/product/${product._id}`} className="block">
               <h4 className="font-medium">{product.name}</h4>
               {product.discountPrice ? (
-  <p className="mt-1 text-gray-900 font-semibold">
-    ₹ {product.discountPrice}{" "}
-    <span className="text-sm text-gray-300 line-through ml-2">
+  <p className="mt-1 font-semibold text-black">
+    ₹ {product.discountPrice}
+    <span className="text-sm text-gray-500 line-through ml-2">
       ₹ {product.price}
+    </span>
+    <span className="text-green-600 text-sm font-semibold ml-2">
+      ({Math.round(((product.price - product.discountPrice) / product.price) * 100)}% OFF)
     </span>
   </p>
 ) : (
-  <p className="mt-1 font-semibold">₹ {product.price}</p>
+  <p className="mt-1 font-semibold text-black">₹ {product.price}</p>
 )}
+
 
             </Link>
           </div>

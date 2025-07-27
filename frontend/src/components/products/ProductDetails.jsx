@@ -225,18 +225,24 @@ const ProductDetails = ({ productId }) => {
         {/* Product Info Section */}
         <div className="md:ml-10 mt-6 md:mt-0">
           <h1 className="text-2xl font-semibold mb-2">{selectedProduct.name}</h1>
-          {selectedProduct.discountPrice ? (
-  <div className="flex items-baseline gap-2 mb-4">
-    <p className="text-2xl font-semibold text-green-600">
-      ₹ {selectedProduct.discountPrice}
-    </p>
-    <del className="text-lg text-gray-500">₹ {selectedProduct.price}</del>
+          {selectedProduct.discountPrice && selectedProduct.discountPrice < selectedProduct.price ? (
+  <div className="flex flex-col gap-1 mb-4">
+    <div className="flex items-center gap-3">
+      <p className="text-2xl font-semibold text-gray-900">
+        ₹{selectedProduct.discountPrice}
+      </p>
+      <del className="text-lg text-gray-500">₹{selectedProduct.price}</del>
+    </div>
+    <span className="inline-block bg-green-100 text-green-700 text-sm font-bold px-2 py-0.5 rounded w-fit">
+      {Math.round(((selectedProduct.price - selectedProduct.discountPrice) / selectedProduct.price) * 100)}% OFF
+    </span>
   </div>
 ) : (
   <p className="text-2xl font-semibold text-black mb-4">
-    ₹ {selectedProduct.price}
+    ₹{selectedProduct.price}
   </p>
 )}
+
 
 
           <p className="mb-4 text-gray-700 whitespace-pre-line">{selectedProduct.description}</p>

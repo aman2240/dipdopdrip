@@ -15,6 +15,10 @@ const Checkout = () => {
   const [checkoutId, setCheckoutId] = useState(null);
   const [isCODLoading, setIsCODLoading] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("razorpay");
+  const [promoCode, setPromoCode] = useState("");
+const [discount, setDiscount] = useState(0);
+const [promoError, setPromoError] = useState("");
+
   const [isFinalizing, setIsFinalizing] = useState(false);
 
   const [shippingAddress, setShippingAddress] = useState({
@@ -34,7 +38,8 @@ const Checkout = () => {
     }
   }, [cart, navigate]);
 
-  const totalAmount = cart.totalPrice;
+  const totalAmount = Math.max((cart.totalPrice ?? 0) - discount, 0);
+
 
   const handleCreateCheckout = async (e) => {
     e.preventDefault();
@@ -202,6 +207,18 @@ const Checkout = () => {
   if (loading) return <p>Loading cart...</p>;
   if (error) return <p>Error: {error}</p>;
   if (!cart || !cart.products || cart.products.length === 0) return <p>Your cart is empty</p>;
+
+  const handleApplyPromo = () => {
+  const trimmedCode = promoCode.trim().toUpperCase();
+  if (trimmedCode === "DRIP100") {
+    setDiscount(100);
+    setPromoError("");
+  } else {
+    setDiscount(0);
+    setPromoError("Invalid promo code");
+  }
+};
+
 
   return (
     <div className="checkout-page">
@@ -386,6 +403,28 @@ const Checkout = () => {
 
       <div className="bg-gray-50 p-6 rounded-lg">
   <h3 className="text-lg mb-4 font-semibold">Order Summary</h3>
+  <div className="mb-4">
+  <label className="block text-gray-700 mb-1">Promo Code</label>
+  <div className="flex gap-2">
+    <input
+      type="text"
+      value={promoCode}
+      onChange={(e) => setPromoCode(e.target.value)}
+      className="w-full p-2 border rounded"
+      placeholder="Enter promo code"
+    />
+    <button
+      type="button"
+      onClick={handleApplyPromo}
+      className="bg-black text-white px-4 py-2 rounded"
+    >
+      Apply
+    </button>
+  </div>
+  {promoError && <p className="text-red-600 mt-1">{promoError}</p>}
+  {discount > 0 && <p className="text-green-600 mt-1">Promo applied! ₹{discount} off</p>}
+</div>
+
   <div className="space-y-4 mb-6">
     {cart.products.map((product, index) => {
       const color = product.color || product.variant?.color || "";
@@ -432,6 +471,12 @@ const Checkout = () => {
     <p>Subtotal</p>
     <p>₹{cart.totalPrice?.toLocaleString()}</p>
   </div>
+  {discount > 0 && (
+  <div className="flex justify-between text-lg mb-4 text-green-600">
+    <p>Promo Discount</p>
+    <p>-₹{discount}</p>
+  </div>
+)}
   <div className="flex justify-between text-lg mb-4">
     <p>Shipping</p>
     <p>Free</p>

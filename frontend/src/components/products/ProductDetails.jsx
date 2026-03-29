@@ -9,13 +9,15 @@ import { fetchProductDetails, fetchSimilarProducts } from '../../redux/slices/pr
 import { addToCart } from '../../redux/slices/cartSlice';
 import axios from 'axios';
 import colorMap from '../../utils/colorMap';
+import { optimizeImage } from '../../utils/cloudinary';
 
 const ProductDetails = ({ productId }) => {
   const { id } = useParams();
   const dispatch = useDispatch();
+
   useEffect(() => {
-  window.scrollTo(0, 0);
-}, []);
+    window.scrollTo(0, 0);
+  }, []);
 
   const { selectedProduct, loading, error, similarProducts } = useSelector((state) => state.products);
   const { user, guestId } = useSelector((state) => state.auth);
@@ -24,6 +26,7 @@ const ProductDetails = ({ productId }) => {
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedSize, setSelectedSize] = useState('');
   const [mainImage, setMainImage] = useState('');
+  const [imgLoaded, setImgLoaded] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
@@ -55,24 +58,36 @@ const ProductDetails = ({ productId }) => {
 
   const getFirstImage = (imagesObj, color) => imagesObj?.[color]?.[0] || '';
 
+  // On product load: set first color + preload ALL color variant images into browser cache
   useEffect(() => {
     if (selectedProduct?.skuVariants?.length > 0 && selectedProduct?.images) {
       const firstColor = selectedProduct.skuVariants[0].color;
       setSelectedColor(firstColor);
-      setMainImage(getFirstImage(selectedProduct.images, firstColor));
+      setMainImage(optimizeImage(getFirstImage(selectedProduct.images, firstColor)));
+
+      // Preload every image for every color silently — by the time user clicks a color, it's cached
+      const allColors = [...new Set(selectedProduct.skuVariants.map((v) => v.color.trim()))];
+      allColors.forEach((color) => {
+        selectedProduct.images?.[color]?.forEach((imgUrl) => {
+          const img = new Image();
+          img.src = optimizeImage(imgUrl);
+        });
+      });
     }
   }, [selectedProduct]);
 
+  // Sync mainImage when selectedColor changes
   useEffect(() => {
     if (selectedColor && selectedProduct?.images?.[selectedColor]) {
-      setMainImage(selectedProduct.images[selectedColor][0]);
+      setMainImage(optimizeImage(selectedProduct.images[selectedColor][0]));
     }
   }, [selectedColor, selectedProduct]);
 
   const handleColorSelect = (color) => {
     setSelectedColor(color);
     setSelectedSize('');
-    setMainImage(getFirstImage(selectedProduct.images, color));
+    setImgLoaded(false); // show shimmer while new image loads (will be instant if cached)
+    setMainImage(optimizeImage(getFirstImage(selectedProduct.images, color)));
   };
 
   const handleSizeSelect = (size) => setSelectedSize(size);
@@ -116,57 +131,44 @@ const ProductDetails = ({ productId }) => {
   };
 
   const handleReviewSubmit = async () => {
-  if (!rating || !reviewText) {
-    toast.error('Please provide a rating and review text');
-    return;
-  }
-
-  let imageUrl = null;
-
-  try {
-    // Step 1: Upload image if selected
-    if (reviewImage) {
-      const formData = new FormData();
-      formData.append("image", reviewImage);
-
-      const uploadRes = await axios.post("/api/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      imageUrl = uploadRes.data.imageUrl;
+    if (!rating || !reviewText) {
+      toast.error('Please provide a rating and review text');
+      return;
     }
 
-    // Step 2: Submit the review with imageUrl
-    await axios.post(
-      `/api/products/${productFetchId}/reviews`,
-      {
-        rating,
-        comment: reviewText,
-        image: imageUrl,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-        },
+    let imageUrl = null;
+
+    try {
+      if (reviewImage) {
+        const formData = new FormData();
+        formData.append('image', reviewImage);
+
+        const uploadRes = await axios.post('/api/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        imageUrl = uploadRes.data.imageUrl;
       }
-    );
 
-    toast.success("Review submitted");
-    setRating(0);
-    setReviewText("");
-    setReviewImage(null);
+      await axios.post(
+        `/api/products/${productFetchId}/reviews`,
+        { rating, comment: reviewText, image: imageUrl },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('userToken')}` } }
+      );
 
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products/${productFetchId}`);
-    setProduct(res.data);
-    setReviews(res.data.reviews || []);
-  } catch (error) {
-    console.error("Review Submit Error:", error);
-    toast.error(error?.response?.data?.message || "Failed to submit review");
-  }
-};
+      toast.success('Review submitted');
+      setRating(0);
+      setReviewText('');
+      setReviewImage(null);
 
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products/${productFetchId}`);
+      setProduct(res.data);
+      setReviews(res.data.reviews || []);
+    } catch (error) {
+      console.error('Review Submit Error:', error);
+      toast.error(error?.response?.data?.message || 'Failed to submit review');
+    }
+  };
 
   const handleReviewImageChange = (e) => {
     const file = e.target.files[0];
@@ -184,153 +186,170 @@ const ProductDetails = ({ productId }) => {
     ?.filter((v) => v.color.toLowerCase() === selectedColor.toLowerCase())
     .map((v) => v.size);
 
-
   return (
     <div className="p-6 max-w-6xl mx-auto">
       {selectedProduct && (
-      <div className="flex flex-col md:flex-row">
-        {/* Image Section */}
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Thumbnails */}
-          <div className="flex md:flex-col gap-3 order-2 md:order-1 justify-center md:justify-start md:mr-4">
-            {selectedProduct.images?.[selectedColor]?.map((img, i) => (
-  <img
-    key={i}
-    src={img}
-    alt={`Thumbnail ${i}`}
-    onClick={() => setMainImage(img)}
-    className={`w-20 h-20 object-cover rounded-md cursor-pointer border transition duration-200 ${
-      mainImage === img ? 'border-black ring-2 ring-black ring-offset-2' : 'border-gray-300'
-    }`}
-  />
-))}
+        <div className="flex flex-col md:flex-row">
 
-          </div>
+          {/* Image Section */}
+          <div className="flex flex-col md:flex-row gap-6">
 
-          {/* Main Image */}
-          <div className="flex-1 order-1 md:order-2">
-            <div className="w-full max-w-[480px] mx-auto rounded-lg overflow-hidden shadow-md border bg-white">
-              {mainImage ? (
-  <img src={mainImage} alt="Main Product" className="w-full h-full object-cover" />
-) : (
-  <div className="w-full h-[400px] flex items-center justify-center text-gray-400 text-sm">
-    No image available
-  </div>
-)}
-
+            {/* Thumbnails */}
+            <div className="flex md:flex-col gap-3 order-2 md:order-1 justify-center md:justify-start md:mr-4">
+              {selectedProduct.images?.[selectedColor]?.map((img, i) => {
+                const optimizedThumb = optimizeImage(img, 160);
+                const optimizedMain = optimizeImage(img);
+                return (
+                  <img
+                    key={i}
+                    src={optimizedThumb}
+                    alt={`Thumbnail ${i}`}
+                    loading="lazy"
+                    decoding="async"
+                    onClick={() => {
+                      setImgLoaded(false);
+                      setMainImage(optimizedMain);
+                    }}
+                    className={`w-20 h-20 object-cover rounded-md cursor-pointer border transition duration-200 ${
+                      mainImage === optimizedMain
+                        ? 'border-black ring-2 ring-black ring-offset-2'
+                        : 'border-gray-300'
+                    }`}
+                  />
+                );
+              })}
             </div>
-          </div>
-        </div>
 
-        {/* Product Info Section */}
-        <div className="md:ml-10 mt-6 md:mt-0">
-          <h1 className="text-2xl font-semibold mb-2">{selectedProduct.name}</h1>
-          {selectedProduct.discountPrice && selectedProduct.discountPrice < selectedProduct.price ? (
-  <div className="flex flex-col gap-1 mb-4">
-    <div className="flex items-center gap-3">
-      <p className="text-2xl font-semibold text-gray-900">
-        ₹{selectedProduct.discountPrice}
-      </p>
-      <del className="text-lg text-gray-500">₹{selectedProduct.price}</del>
-    </div>
-    <span className="inline-block bg-green-100 text-green-700 text-sm font-bold px-2 py-0.5 rounded w-fit">
-      {Math.round(((selectedProduct.price - selectedProduct.discountPrice) / selectedProduct.price) * 100)}% OFF
-    </span>
-  </div>
-) : (
-  <p className="text-2xl font-semibold text-black mb-4">
-    ₹{selectedProduct.price}
-  </p>
-)}
-
-
-
-          <p className="mb-4 text-gray-700 whitespace-pre-line">{selectedProduct.description}</p>
-
-
-          {/* Color Selection */}
-          <div className="mb-4">
-            <p className="text-sm font-medium text-gray-700">Select Color:</p>
-            <div className="flex gap-2 mt-2">
-              {availableColors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => handleColorSelect(color)}
-                  className={`w-8 h-8 rounded-full border ${
-                    selectedColor === color ? 'border-black border-4' : 'border-gray-300'
-                  }`}
-                  style={{ backgroundColor: colorMap[color] || '#ccc' }}
-
-                ></button>
-              ))}
+            {/* Main Image */}
+            <div className="flex-1 order-1 md:order-2">
+              <div className="w-full max-w-[480px] mx-auto rounded-lg overflow-hidden shadow-md border bg-white relative">
+                {mainImage ? (
+                  <>
+                    <img
+                      src={mainImage}
+                      alt="Main Product"
+                      className="w-full h-full object-cover"
+                      style={{
+                        opacity: imgLoaded ? 1 : 0,
+                        transition: 'opacity 0.2s ease',
+                      }}
+                      onLoad={() => setImgLoaded(true)}
+                      onError={() => setImgLoaded(true)}
+                    />
+                    {/* Shimmer shown while image is loading */}
+                    {!imgLoaded && (
+                      <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full h-[400px] flex items-center justify-center text-gray-400 text-sm">
+                    No image available
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Size Selection */}
-          {selectedColor && (
+          {/* Product Info Section */}
+          <div className="md:ml-10 mt-6 md:mt-0">
+            <h1 className="text-2xl font-semibold mb-2">{selectedProduct.name}</h1>
+
+            {selectedProduct.discountPrice && selectedProduct.discountPrice < selectedProduct.price ? (
+              <div className="flex flex-col gap-1 mb-4">
+                <div className="flex items-center gap-3">
+                  <p className="text-2xl font-semibold text-gray-900">₹{selectedProduct.discountPrice}</p>
+                  <del className="text-lg text-gray-500">₹{selectedProduct.price}</del>
+                </div>
+                <span className="inline-block bg-green-100 text-green-700 text-sm font-bold px-2 py-0.5 rounded w-fit">
+                  {Math.round(((selectedProduct.price - selectedProduct.discountPrice) / selectedProduct.price) * 100)}% OFF
+                </span>
+              </div>
+            ) : (
+              <p className="text-2xl font-semibold text-black mb-4">₹{selectedProduct.price}</p>
+            )}
+
+            <p className="mb-4 text-gray-700 whitespace-pre-line">{selectedProduct.description}</p>
+
+            {/* Color Selection */}
             <div className="mb-4">
-              <p className="text-sm font-medium text-gray-700">Select Size:</p>
+              <p className="text-sm font-medium text-gray-700">Select Color:</p>
               <div className="flex gap-2 mt-2">
-                {availableSizes.map((size) => (
+                {availableColors.map((color) => (
                   <button
-                    key={size}
-                    onClick={() => handleSizeSelect(size)}
-                    className={`px-3 py-1 border rounded ${selectedSize === size ? 'bg-black text-white' : ''}`}
-                  >
-                    {size}
-                  </button>
+                    key={color}
+                    onClick={() => handleColorSelect(color)}
+                    className={`w-8 h-8 rounded-full border ${
+                      selectedColor === color ? 'border-black border-4' : 'border-gray-300'
+                    }`}
+                    style={{ backgroundColor: colorMap[color] || '#ccc' }}
+                  />
                 ))}
               </div>
             </div>
-          )}
 
-          {/* Quantity & Add to Cart */}
-          <div className="mb-6">
-            <p className="text-sm font-medium text-gray-700">Quantity:</p>
-            <div className="flex gap-3 items-center mt-2">
-              <button onClick={() => handleQuantityChange('minus')} className="px-3 py-1 bg-gray-200 rounded">-</button>
-              <span>{quantity}</span>
-              <button onClick={() => handleQuantityChange('plus')} className="px-3 py-1 bg-gray-200 rounded">+</button>
+            {/* Size Selection */}
+            {selectedColor && (
+              <div className="mb-4">
+                <p className="text-sm font-medium text-gray-700">Select Size:</p>
+                <div className="flex gap-2 mt-2">
+                  {availableSizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => handleSizeSelect(size)}
+                      className={`px-3 py-1 border rounded ${selectedSize === size ? 'bg-black text-white' : ''}`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity & Add to Cart */}
+            <div className="mb-6">
+              <p className="text-sm font-medium text-gray-700">Quantity:</p>
+              <div className="flex gap-3 items-center mt-2">
+                <button onClick={() => handleQuantityChange('minus')} className="px-3 py-1 bg-gray-200 rounded">-</button>
+                <span>{quantity}</span>
+                <button onClick={() => handleQuantityChange('plus')} className="px-3 py-1 bg-gray-200 rounded">+</button>
+              </div>
+            </div>
+
+            <button
+              onClick={handleAddToCart}
+              disabled={isAdding}
+              className={`w-full py-2 rounded text-white ${
+                isAdding ? 'bg-gray-500 cursor-not-allowed' : 'bg-black hover:bg-gray-800'
+              }`}
+            >
+              {isAdding ? 'Adding...' : 'Add to Cart'}
+            </button>
+
+            {/* Product Characteristics */}
+            <div className="mt-10 text-gray-700">
+              <h3 className="text-xl font-bold mb-4">Characteristics:</h3>
+              <table className="w-full text-left text-sm">
+                <tbody>
+                  <tr>
+                    <td className="py-1">Brand</td>
+                    <td className="py-1">dipdopdrip</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1">Material</td>
+                    <td className="py-1">{selectedProduct.material}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-
-          <button
-            onClick={handleAddToCart}
-            disabled={isAdding}
-            className={`w-full py-2 rounded text-white ${
-              isAdding ? 'bg-gray-500 cursor-not-allowed' : 'bg-black hover:bg-gray-800'
-            }`}
-          >
-            {isAdding ? 'Adding...' : 'Add to Cart'}
-          </button>
-
-          {/* Product Characteristics */}
-          <div className="mt-10 text-gray-700">
-            <h3 className="text-xl font-bold mb-4">Characteristics:</h3>
-            <table className="w-full text-left text-sm">
-              <tbody>
-                <tr>
-                  <td className="py-1">Brand</td>
-                  <td className="py-1">dipdopdrip</td>
-                </tr>
-                <tr>
-                  <td className="py-1">Material</td>
-                  <td className="py-1">{selectedProduct.material}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
-      </div>
       )}
 
       {/* Similar Products */}
       <div className="mt-10 w-full overflow-x-visible">
-  <h2 className="text-2xl text-center font-medium mb-4">You May Also Like</h2>
-  <ProductGrid products={similarProducts} loading={loading} error={error} />
-</div>
-
-
+        <h2 className="text-2xl text-center font-medium mb-4">You May Also Like</h2>
+        <ProductGrid products={similarProducts} loading={loading} error={error} />
+      </div>
 
       {/* Review Section */}
       <div className="mt-10">
@@ -366,30 +385,34 @@ const ProductDetails = ({ productId }) => {
             onChange={handleReviewImageChange}
             className="hidden"
           />
-          {reviewImage && <span className="text-sm text-gray-600 truncate max-w-xs">{reviewImage.name}</span>}
+          {reviewImage && (
+            <span className="text-sm text-gray-600 truncate max-w-xs">{reviewImage.name}</span>
+          )}
         </div>
         <div className="flex justify-center mt-4">
-          <button onClick={handleReviewSubmit} className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800">
+          <button
+            onClick={handleReviewSubmit}
+            className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
+          >
             Submit Review
           </button>
         </div>
       </div>
 
-      {/* Display Customer Reviews */}
+      {/* Customer Reviews */}
       {reviews.length > 0 && (
         <div className="mt-10">
           <h2 className="text-2xl font-semibold mb-4">Customer Reviews</h2>
           {reviews.map((review, index) => (
             <div key={index} className="border rounded p-4 mb-4">
-  <div className="flex justify-between mb-1">
-    <div className="font-semibold text-sm text-gray-800">
-      {review?.user?.name || 'Anonymous'}
-    </div>
-    <div className="text-xs text-gray-500">
-      {new Date(review?.createdAt).toLocaleDateString()}
-    </div>
-  </div>
-
+              <div className="flex justify-between mb-1">
+                <div className="font-semibold text-sm text-gray-800">
+                  {review?.user?.name || 'Anonymous'}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {new Date(review?.createdAt).toLocaleDateString()}
+                </div>
+              </div>
               <div className="flex mb-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <FaStar
@@ -401,7 +424,13 @@ const ProductDetails = ({ productId }) => {
               </div>
               <p className="text-gray-700 mb-2">{review.comment}</p>
               {review.image?.trim() && (
-                <img src={review.image} alt="Review" className="w-40 h-auto rounded" />
+                <img
+                  src={optimizeImage(review.image, 300)}
+                  alt="Review"
+                  className="w-40 h-auto rounded"
+                  loading="lazy"
+                  decoding="async"
+                />
               )}
             </div>
           ))}
